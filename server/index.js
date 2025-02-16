@@ -21,7 +21,7 @@ mongoose
 
 
 // Register endpoint (fixed route without extra space)
-app.post('/api/register', async (req, res) => {
+app.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -49,7 +49,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // Login endpoint
-app.post('/api/login', async (req, res) => {
+app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
