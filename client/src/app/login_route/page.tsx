@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,10 +11,11 @@ const LoginForm = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [message, setMessage] = useState(""); // State for success or error message
-  const [loading, setLoading] = useState(false); // State for button loading
-  const router = useRouter(); // For navigation
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter(); // Navigation hook
 
+  // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -23,44 +24,48 @@ const LoginForm = () => {
     }));
   };
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoading(true); // Start the loading state
-    setMessage(""); // Clear any previous messages
+    setLoading(true);
+    setMessage("");
 
     try {
-      // Make a POST request to the login endpoint
-      const response = await axios.post('https://watch-and-earn-j4hl-rouge.vercel.app/login', {
+      // Make API request
+      const response = await axios.post("http://localhost:3001/login", {
         email: formData.email,
         password: formData.password,
       });
 
       if (response.status === 200) {
-        // Login successful
         setMessage("Login successful!");
         console.log(response.data);
 
-        // Optionally store the token or user data
+        // Store token if available
         if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token); // Save the token
+          localStorage.setItem("authToken", response.data.token);
         }
 
-        // Redirect to the payment route after successful login
-        setTimeout(() => {
-          router.push("/payment_route");
-        }, 1500);
+        // Redirect based on email
+        if (formData.email === "admin@gmail.com") {
+          setTimeout(() => {
+            router.push("/dashboard"); // Admin goes to dashboard
+          }, 1000);
+        } else {
+          setTimeout(() => {
+            router.push("/payment_route"); // Regular users
+          }, 1000);
+        }
       } else {
-        // Handle unexpected response
         setMessage("Unexpected error occurred. Please try again.");
       }
     } catch (error: any) {
-      // Handle login errors
       console.error(error);
       setMessage(
         error.response?.data?.message || "Login failed. Please check your email and password."
       );
     } finally {
-      setLoading(false); // End the loading state
+      setLoading(false);
     }
   };
 
@@ -105,25 +110,7 @@ const LoginForm = () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-200"
               >
-                {showPassword ? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M13.875 9.429a3.001 3.001 0 00-4.254-4.254 4.992 4.992 0 014.254 4.254zm-3.797 5.188a3 3 0 01-4.254-4.254 5 5 0 004.254 4.254z" />
-                  </svg>
-                ) : (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path d="M10 2a8 8 0 11-.001 16.001A8 8 0 0110 2zM5.705 6.715a1 1 0 011.418 0l2.12 2.121 2.122-2.12a1 1 0 111.417 1.418l-2.121 2.122 2.12 2.122a1 1 0 01-1.417 1.418l-2.122-2.121-2.122 2.121a1 1 0 11-1.418-1.418l2.121-2.122-2.12-2.12a1 1 0 010-1.418z" />
-                  </svg>
-                )}
+                {showPassword ? "🙈" : "👁️"}
               </button>
             </div>
           </div>
@@ -143,7 +130,7 @@ const LoginForm = () => {
         {/* Display success or error message */}
         {message && <p className="text-center mt-4 text-sm text-white">{message}</p>}
 
-        {/* Don't have an account Link */}
+        {/* Register Link */}
         <div className="text-sm text-center text-white mt-4">
           <p>
             Don't have an account?{" "}

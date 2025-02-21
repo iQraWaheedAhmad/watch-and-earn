@@ -1,8 +1,15 @@
-'use client';
-import React, { useState, useEffect, useRef, KeyboardEvent } from 'react';
-import { collection, query, orderBy, onSnapshot, addDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/app/firebase/firebaseConfig';
-import { MessageSquare, Send, X } from 'lucide-react';
+"use client";
+import React, { useState, useEffect, useRef, KeyboardEvent } from "react";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "@/app/firebase/firebaseConfig";
+import { MessageSquare, Send, X } from "lucide-react";
 
 // Define the Message interface
 interface Message {
@@ -13,19 +20,14 @@ interface Message {
 }
 
 const Chat = () => {
-  // State for toggling the chat window
   const [open, setOpen] = useState<boolean>(false);
-  // State to store messages fetched from Firestore
   const [messages, setMessages] = useState<Message[]>([]);
-  // State for new message input
-  const [newMessage, setNewMessage] = useState<string>('');
-  // Reference for auto-scrolling to the bottom of the chat window
+  const [newMessage, setNewMessage] = useState<string>("");
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const currentUserId = "user123"; // 🔹 Replace with actual authenticated user ID
 
-  // Fetch messages from Firestore in real-time
   useEffect(() => {
-    // Create a query to fetch messages in ascending order based on timestamp
-    const q = query(collection(db, 'messages'), orderBy('timestamp', 'asc'));
+    const q = query(collection(db, "messages"), orderBy("timestamp", "asc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedMessages = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -34,31 +36,24 @@ const Chat = () => {
       setMessages(fetchedMessages);
     });
 
-    // Cleanup listener on unmount
     return () => unsubscribe();
   }, []);
 
-  // Auto-scroll to the bottom when messages update
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Function to handle sending a message to Firestore
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
     try {
-      // Create a new message document in Firestore
-      await addDoc(collection(db, 'messages'), {
+      await addDoc(collection(db, "messages"), {
         text: newMessage,
         timestamp: Timestamp.now(),
-        userId: 'user123', // Replace with actual user ID (from authentication)
+        userId: currentUserId, // 🔹 Set the sender ID
       });
-      // Clear the input field after sending
-      setNewMessage('');
+      setNewMessage("");
     } catch (err) {
-      console.error('Error sending message:', err);
+      console.error("Error sending message:", err);
     }
   };
 
@@ -85,11 +80,19 @@ const Chat = () => {
               <X className="w-5 h-5" />
             </button>
           </div>
+
           {/* Messages Container */}
           <div className="h-64 overflow-y-auto p-4">
             {messages.length > 0 ? (
               messages.map((msg) => (
-                <div key={msg.id} className="p-2 my-2 rounded-lg bg-gray-100">
+                <div
+                  key={msg.id}
+                  className={`p-2 my-2 rounded-lg shadow-sm w-fit max-w-[75%] ${
+                    msg.userId === currentUserId
+                      ? "ml-auto bg-yellow-300 text-right" // Sent Message (Right)
+                      : "mr-auto bg-gray-200 text-left" // Received Message (Left)
+                  }`}
+                >
                   {msg.text}
                 </div>
               ))
@@ -98,6 +101,7 @@ const Chat = () => {
             )}
             <div ref={messagesEndRef} />
           </div>
+
           {/* Input Area */}
           <div className="border-t p-3">
             <div className="flex gap-2">
@@ -106,7 +110,7 @@ const Chat = () => {
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e: KeyboardEvent<HTMLInputElement>) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     handleSendMessage();
                   }

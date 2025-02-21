@@ -4,7 +4,7 @@ import Footer from './components/Footer'
 import MoreInfo from './components/MoreInfo';
 import Account from './components/Account';
 
-import { db } from './firebase/firebaseConfig';
+
 import Detail from './components/Detail';
 
 

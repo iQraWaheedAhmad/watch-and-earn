@@ -1,80 +1,84 @@
-const mongoose = require('mongoose');
-const express = require('express');
-const cors = require('cors');
-const bcrypt = require('bcryptjs'); // For password hashing
-const EmployeeModel = require('./models/Employee'); // Import the Employee model
+const mongoose = require("mongoose");
+const express = require("express");
+const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const EmployeeModel = require("./models/Employee"); // Import the Employee model
 const app = express();
 
-// Middleware setup: Parse JSON request bodies and enable CORS
+// Middleware setup
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: "*" }));
 
-// MongoDB connection (using a correct local connection string)
-// For remote connection, update the connection string accordingly
+// MongoDB connection
 mongoose
-  .connect('mongodb://127.0.0.1:27017/employee', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("MongoDB connected successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .connect("mongodb://127.0.0.1:27017/employee")
+  .then(() => console.log("✅ MongoDB connected successfully"))
+  .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-
-// Register endpoint (fixed route without extra space)
-app.post('/register', async (req, res) => {
+// Register endpoint
+app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // Check if the email is already registered
-    const existingUser = await EmployeeModel.findOne({ email });
+ const existingUser = await EmployeeModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered" });
+      return res.status(400).json({ message: "❌ Email is already registered" });
     }
 
-    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new employee
-    const newEmployee = await EmployeeModel.create({
+    const newEmployee = new EmployeeModel({
       name,
       email,
       password: hashedPassword,
     });
 
-    res.status(201).json({ message: "Registration successful", employee: newEmployee });
+    await newEmployee.save();
+    res.status(201).json({ message: "✅ Registration successful", employee: newEmployee });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error during registration:", err);
     res.status(500).json({ error: "Server error during registration" });
   }
 });
 
 // Login endpoint
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Find the user by email
+    // Check if user is admin
+    if (email === "admin@gmail.com") {
+      if (password === "Imranhelo123@") {
+        return res.status(200).json({
+          message: "✅ Admin login successful",
+          user: { email: "admin@gmail.com", role: "admin" },
+        });
+      } else {
+        return res.status(401).json({ message: "❌ Incorrect admin password" });
+      }
+    }
+
+    // Find normal user
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "No user found with that email" });
+      return res.status(401).json({ message: "❌ No user found with that email" });
     }
 
-    // Compare the provided password with the stored hashed password
+    // Compare password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: "Incorrect password" });
+      return res.status(401).json({ message: "❌ Incorrect password" });
     }
 
-    // If login is successful
-    res.status(200).json({ message: "Login successful", user });
+    res.status(200).json({ message: "✅ Login successful", user });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error during login:", error);
     res.status(500).json({ error: "Server error during login" });
   }
 });
 
 // Start the server
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`🚀 Server is running on port ${PORT}`);
 });

@@ -1,6 +1,9 @@
+// firebaseConfig.ts
 import { initializeApp } from "firebase/app";
+
 import { getFirestore } from "firebase/firestore";
 
+// Your Firebase project configuration
 const firebaseConfig = {
   apiKey: "AIzaSyBnr3CCVIFBwMlnYFVKj7pZF2PXtCgBU-M",
   authDomain: "chat-4252a.firebaseapp.com",
@@ -13,5 +16,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export default app;
+  // ✅ Initialize Firebase Auth
+const db = getFirestore(app); // ✅ Initialize Firestore
+
+export { db }; // ✅ Export 'auth' and 'db'
