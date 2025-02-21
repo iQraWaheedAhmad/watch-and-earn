@@ -43,7 +43,7 @@ const RegistrationForm = () => {
 
     try {
       // Fixed the URL by removing the extra slash
-      const response = await axios.post('http://localhost:3001/register', {
+      const response = await axios.post('https://watch-and-earn-production.up.railway.app/register', {
         name,
         email,
         password,

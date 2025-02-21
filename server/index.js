@@ -2,16 +2,21 @@ const mongoose = require("mongoose");
 const express = require("express");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
-const EmployeeModel = require("./models/Employee"); // Import the Employee model
+const EmployeeModel = require("./models/Employee");
+require("dotenv").config(); // Load environment variables
+
 const app = express();
 
 // Middleware setup
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
-// MongoDB connection
+// MongoDB connection (Updated)
 mongoose
-  .connect("mongodb://127.0.0.1:27017/employee")
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
@@ -20,7 +25,7 @@ app.post("/register", async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
- const existingUser = await EmployeeModel.findOne({ email });
+    const existingUser = await EmployeeModel.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "❌ Email is already registered" });
     }
@@ -46,7 +51,6 @@ app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check if user is admin
     if (email === "admin@gmail.com") {
       if (password === "Imranhelo123@") {
         return res.status(200).json({
@@ -58,13 +62,11 @@ app.post("/login", async (req, res) => {
       }
     }
 
-    // Find normal user
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "❌ No user found with that email" });
     }
 
-    // Compare password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "❌ Incorrect password" });

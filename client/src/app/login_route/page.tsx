@@ -32,7 +32,7 @@ const LoginForm = () => {
 
     try {
       // Make API request
-      const response = await axios.post("http://localhost:3001/login", {
+      const response = await axios.post("https://watch-and-earn-production.up.railway.app/login", {
         email: formData.email,
         password: formData.password,
       });
