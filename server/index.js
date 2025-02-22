@@ -9,11 +9,20 @@ const app = express();
 
 // Middleware setup
 app.use(express.json());
-app.use(cors({ origin: '*' }));
 
-// MongoDB connection
+// CORS setup (restrict to frontend URL)
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  methods: ["GET", "POST"],
+  credentials: true
+}));
+
+// MongoDB connection (Use .env for secure connection)
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(process.env.MONGO_URI || `${API_BASE_URL}`, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
 
@@ -21,6 +30,10 @@ mongoose
 app.post('/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: '❌ All fields are required' });
+    }
 
     const existingUser = await EmployeeModel.findOne({ email });
     if (existingUser) {
@@ -36,7 +49,7 @@ app.post('/register', async (req, res) => {
     });
 
     await newEmployee.save();
-    res.status(201).json({ message: '✅ Registration successful', employee: newEmployee });
+    res.status(201).json({ message: '✅ Registration successful' });
   } catch (err) {
     console.error('❌ Error during registration:', err);
     res.status(500).json({ error: 'Server error during registration' });
@@ -48,17 +61,23 @@ app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    if (email === 'admin@gmail.com') {
-      if (password === 'Imranhelo123@') {
+    if (!email || !password) {
+      return res.status(400).json({ message: '❌ Email and password are required' });
+    }
+
+    // Admin login (secure credentials from .env)
+    if (email === process.env.ADMIN_EMAIL) {
+      if (password === process.env.ADMIN_PASSWORD) {
         return res.status(200).json({
           message: '✅ Admin login successful',
-          user: { email: 'admin@gmail.com', role: 'admin' },
+          user: { email: process.env.ADMIN_EMAIL, role: 'admin' },
         });
       } else {
         return res.status(401).json({ message: '❌ Incorrect admin password' });
       }
     }
 
+    // Normal user login
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: '❌ No user found with that email' });
