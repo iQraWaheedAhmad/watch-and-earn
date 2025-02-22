@@ -17,14 +17,18 @@ app.use(cors({
   credentials: true
 }));
 
-// MongoDB connection (Use .env for secure connection)
+// MongoDB connection
 mongoose
-  .connect(process.env.MONGO_URI || `${API_BASE_URL}`, {
+  .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/employees", {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
   .then(() => console.log('✅ MongoDB connected successfully'))
   .catch((err) => console.error('❌ MongoDB connection error:', err));
+
+// Admin credentials (Hardcoded)
+const ADMIN_EMAIL = "admin@gmail.com";
+const ADMIN_PASSWORD = "Imranhelo123@";
 
 // Register endpoint
 app.post('/register', async (req, res) => {
@@ -65,12 +69,12 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ message: '❌ Email and password are required' });
     }
 
-    // Admin login (secure credentials from .env)
-    if (email === process.env.ADMIN_EMAIL) {
-      if (password === process.env.ADMIN_PASSWORD) {
+    // Check for Admin Login
+    if (email === ADMIN_EMAIL) {
+      if (password === ADMIN_PASSWORD) {
         return res.status(200).json({
           message: '✅ Admin login successful',
-          user: { email: process.env.ADMIN_EMAIL, role: 'admin' },
+          user: { email: ADMIN_EMAIL, role: 'admin' },
         });
       } else {
         return res.status(401).json({ message: '❌ Incorrect admin password' });
