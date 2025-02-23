@@ -13,11 +13,11 @@ const RegistrationForm = () => {
 
   // Password validation function
   const validatePassword = (password: string) => {
-    const minLength = /.{8,}/; // At least 8 characters
-    const hasNumber = /[0-9]/; // At least one number
-    const hasUpper = /[A-Z]/; // At least one uppercase letter
-    const hasLower = /[a-z]/; // At least one lowercase letter
-    const hasSpecial = /[@!#?$%^&*]/; // At least one special character
+    const minLength = /.{8,}/;
+    const hasNumber = /[0-9]/;
+    const hasUpper = /[A-Z]/;
+    const hasLower = /[a-z]/;
+    const hasSpecial = /[@!#?$%^&*]/;
 
     if (!minLength.test(password)) return 'Password must be at least 8 characters.';
     if (!hasNumber.test(password)) return 'Password must include at least one number.';
@@ -42,127 +42,42 @@ const RegistrationForm = () => {
     }
 
     try {
-      // Fixed the URL by removing the extra slash
-      const response = await axios.post('http://localhost:3001/register', {
-        name,
-        email,
-        password,
+      const response = await axios.post("http://localhost:3001/register", { name, email, password }, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
       });
-      setMessage('Registration successful!');
-      console.log(response.data);
 
-      // Reset form fields
+      setMessage(response.data.message || 'Registration successful!');
       setName('');
       setEmail('');
       setPassword('');
-
-      // Redirect to login page
+      
       setTimeout(() => {
         window.location.href = '/login_route';
       }, 1500);
-    } catch (error) {
-      setMessage('Registration failed. Please try again.');
-      console.error(error);
+    } catch (error: any) {
+      setMessage(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-center bg-black py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex justify-center items-center bg-black py-12 px-4">
       <div className="max-w-md w-full space-y-6 bg-gray-900 p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-extrabold text-center text-white">Register</h2>
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          
-          {/* Name Input */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-white">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-700 rounded-md bg-gray-800 text-gray-100"
-            />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
+          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
+          <div className="relative">
+            <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 text-gray-400">{showPassword ? '👁️' : '🙈'}</button>
           </div>
-
-          {/* Email Input */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-white">
-              Email address
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="mt-1 block w-full px-3 py-2 border border-gray-700 rounded-md bg-gray-800 text-gray-100"
-            />
-          </div>
-
-          {/* Password Input */}
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-white">
-              Password
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 block w-full px-3 py-2 border border-gray-700 rounded-md bg-gray-800 text-gray-100"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-200"
-              >
-                {showPassword ? '👁️' : '🙈'}
-              </button>
-            </div>
-            {passwordError && (
-              <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-            )}
-          </div>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {loading ? 'Registering...' : 'Register'}
-          </button>
+          {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
+          <button type="submit" disabled={loading} className={`w-full bg-indigo-600 text-white py-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>{loading ? 'Registering...' : 'Register'}</button>
         </form>
-
-        {/* Success/Error Message */}
-        {message && (
-          <p className="text-center mt-4 text-sm text-white">{message}</p>
-        )}
-
-        {/* Already have an account? */}
-        <div className="text-sm text-center mt-4 text-white">
-          <p>
-            Already have an account?{' '}
-            <a
-              href="/login_route"
-              className="text-indigo-500 hover:text-indigo-400 font-semibold"
-            >
-              Login
-            </a>
-          </p>
-        </div>
+        {message && <p className="text-center text-white mt-2">{message}</p>}
+        <p className="text-center text-white">Already have an account? <a href="/login_route" className="text-indigo-500">Login</a></p>
       </div>
     </div>
   );

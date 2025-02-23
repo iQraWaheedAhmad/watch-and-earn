@@ -8,31 +8,42 @@ const EmployeeModel = require('./models/Employee');
 const app = express();
 
 // Middleware setup
-app.use(express.json());
-
-// CORS setup (restrict to frontend URL)
+app.use(express.json ());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
   methods: ["GET", "POST"],
   credentials: true
 }));
 
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI || "mongodb://127.0.0.1:27017/employees", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-  })
-  .then(() => console.log('✅ MongoDB connected successfully'))
-  .catch((err) => console.error('❌ MongoDB connection error:', err));
+// Root route to check server status
+app.get("/", (req, res) => {
+  res.send("✅ Server is running and working!");
+});
 
-// Admin credentials (Hardcoded)
-const ADMIN_EMAIL = "admin@gmail.com";
-const ADMIN_PASSWORD = "Imranhelo123@";
+// MongoDB connection
+const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/employees";
+
+mongoose.connect(MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected successfully'))
+  .catch((err) => {
+    console.error('❌ MongoDB connection error:', err);
+    process.exit(1);
+  });
+
+// Load Admin credentials from .env
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+// Ensure admin credentials are set
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error("❌ ERROR: Admin credentials (ADMIN_EMAIL & ADMIN_PASSWORD) are not set in .env file!");
+  process.exit(1);
+}
 
 // Register endpoint
 app.post('/register', async (req, res) => {
   try {
+    console.log("🔍 Incoming Registration Data:", req.body);
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
@@ -63,6 +74,7 @@ app.post('/register', async (req, res) => {
 // Login endpoint
 app.post('/login', async (req, res) => {
   try {
+    console.log("🔍 Incoming Login Data:", req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
