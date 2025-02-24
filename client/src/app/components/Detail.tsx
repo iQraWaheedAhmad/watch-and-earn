@@ -19,16 +19,16 @@ export default function Detail() {
         </h1>
 
         <p className="text-lg mt-4">
-          📌 <strong>Profit Withdrawal:</strong> You can withdraw your earnings **Every 3 hours** throughout the day.
+          📌 <strong>Profit Withdrawal:</strong> You can withdraw your earnings **only once per day**, with a minimum gap of **12 hours** between withdrawals.
         </p>
 
         <p className="text-lg">
-          📌 <strong>Initial Investment:</strong> Your actual investment amount can be withdrawn after <strong>15 days</strong>.
+          📌 <strong>Initial Investment:</strong> Your actual investment amount can be withdrawn after <strong>30 days</strong>.
         </p>
 
         <p className="text-lg">
-          ⚠️ <strong>Policy Notice:</strong> Withdrawals are available **every 2 hours**. Make sure to follow the schedule to avoid any delays.
-        </p>
+          ⚠️ <strong>Policy Notice:</strong> Withdrawals must follow the **12-hour gap rule** to ensure a smooth transaction process.
+        </p> 
 
         <p className="text-lg font-semibold text-yellow-400 mt-4">
           "Your financial growth is our priority! Invest wisely and withdraw with confidence."
