@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection
-const MONGO_URI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/employees";
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://app:RTtL8xR5PSraRPIf@cluster0.1y6ir.mongodb.net/employees";
 
 mongoose.connect(MONGO_URI)
   .then(() => console.log('✅ MongoDB connected successfully'))
