@@ -9,11 +9,10 @@ const LoginForm = () => {
     email: "",
     password: "",
   });
-
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter(); // Navigation hook
+  const router = useRouter();
 
   // Handle input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +30,7 @@ const LoginForm = () => {
     setMessage("");
 
     try {
-      // Make API request
+      // Make API request to the backend login endpoint
       const response = await axios.post("http://localhost:3001/login", {
         email: formData.email,
         password: formData.password,
@@ -53,17 +52,24 @@ const LoginForm = () => {
           }, 1000);
         } else {
           setTimeout(() => {
-            router.push("/payment_route"); // Regular users
+            router.push("/payment_route"); // Regular users go to payment route
           }, 1000);
         }
       } else {
         setMessage("Unexpected error occurred. Please try again.");
       }
-    } catch (error: any) {
-      console.error(error);
-      setMessage(
-        error.response?.data?.message || "Login failed. Please check your email and password."
-      );
+    } catch (error: unknown) {
+      // Narrow the error type before accessing its properties
+      if (axios.isAxiosError(error)) {
+        setMessage(
+          error.response?.data?.message ||
+            "Login failed. Please check your email and password."
+        );
+      } else if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage("Login failed. Please check your email and password.");
+      }
     } finally {
       setLoading(false);
     }
