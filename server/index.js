@@ -7,10 +7,14 @@ const EmployeeModel = require('./models/Employee');
 
 const app = express();
 
+// Determine the CLIENT_ORIGIN to use for CORS.
+// In production, if process.env.CLIENT_ORIGIN is not set, default to the production URL.
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "https://watch-and-earn-production.up.railway.app";
+
 // Middleware setup
 app.use(express.json());
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+  origin: CLIENT_ORIGIN,
   methods: ["GET", "POST"],
   credentials: true
 }));
@@ -52,7 +56,7 @@ app.post('/register', async (req, res) => {
 
     const existingUser = await EmployeeModel.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: ' Email is already registered' });
+      return res.status(400).json({ message: 'Email is already registered' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -64,7 +68,7 @@ app.post('/register', async (req, res) => {
     });
 
     await newEmployee.save();
-    res.status(201).json({ message: ' Registration successful' });
+    res.status(201).json({ message: 'Registration successful' });
   } catch (err) {
     console.error('Error during registration:', err);
     res.status(500).json({ error: 'Server error during registration' });
@@ -85,7 +89,7 @@ app.post('/login', async (req, res) => {
     if (email === ADMIN_EMAIL) {
       if (password === ADMIN_PASSWORD) {
         return res.status(200).json({
-          message: ' Admin login successful',
+          message: 'Admin login successful',
           user: { email: ADMIN_EMAIL, role: 'admin' },
         });
       } else {
@@ -96,17 +100,17 @@ app.post('/login', async (req, res) => {
     // Normal user login
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: ' No user found with that email' });
+      return res.status(401).json({ message: 'No user found with that email' });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(401).json({ message: ' Incorrect password' });
+      return res.status(401).json({ message: 'Incorrect password' });
     }
 
-    res.status(200).json({ message: ' Login successful', user });
+    res.status(200).json({ message: 'Login successful', user });
   } catch (error) {
-    console.error(' Error during login:', error);
+    console.error('Error during login:', error);
     res.status(500).json({ error: 'Server error during login' });
   }
 });
@@ -114,5 +118,5 @@ app.post('/login', async (req, res) => {
 // Start the server on port 3001
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(` Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

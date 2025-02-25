@@ -1,5 +1,4 @@
 'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -24,8 +23,8 @@ export default function AccountsPage() {
               <Image
                 src="/P1.png"
                 alt="JazzCash"
-                width={80}
-                height={80}
+                width={100}
+                height={100}
                 className="object-contain"
               />
             </div>
@@ -49,8 +48,8 @@ export default function AccountsPage() {
               <Image
                 src="/P2.png"
                 alt="Easypaisa"
-                width={80}
-                height={80}
+                width={100}
+                height={100}
                 className="object-contain"
               />
             </div>
