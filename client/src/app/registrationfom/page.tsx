@@ -44,7 +44,7 @@ const RegistrationForm = () => {
     try {
       // Replace the URL with your backend endpoint
       const response = await axios.post(
-        "http://localhost:3001/register", 
+        "https://watch-and-earn-production.up.railway.app/register", 
         { name, email, password }, 
         {
           headers: { 'Content-Type': 'application/json' },
