@@ -1,6 +1,11 @@
 {
   "name": "server",
   "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -8,14 +13,11 @@
     "dev": "nodemon index.js",
     "build": "echo 'No build step needed for Express backend'"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
+    "type": "module",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -26,6 +28,5 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.0"
-  },
-  "type": "commonjs"
+  }
 }
