@@ -42,10 +42,15 @@ const RegistrationForm = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3001/register", { name, email, password }, {
-        headers: { 'Content-Type': 'application/json' },
-        withCredentials: true,
-      });
+      // Replace the URL with your backend endpoint
+      const response = await axios.post(
+        "http://localhost:3001/register", 
+        { name, email, password }, 
+        {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        }
+      );
 
       setMessage(response.data.message || 'Registration successful!');
       setName('');
@@ -55,8 +60,15 @@ const RegistrationForm = () => {
       setTimeout(() => {
         window.location.href = '/login_route';
       }, 1500);
-    } catch (error: any) {
-      setMessage(error.response?.data?.message || 'Registration failed. Please try again.');
+    } catch (error: unknown) {
+      // Narrow the error type
+      if (axios.isAxiosError(error)) {
+        setMessage(error.response?.data?.message || 'Registration failed. Please try again.');
+      } else if (error instanceof Error) {
+        setMessage(error.message);
+      } else {
+        setMessage('Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -67,17 +79,52 @@ const RegistrationForm = () => {
       <div className="max-w-md w-full space-y-6 bg-gray-900 p-8 rounded-lg shadow-lg">
         <h2 className="text-3xl font-extrabold text-center text-white">Register</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
-          <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
+          <input 
+            type="text" 
+            placeholder="Name" 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            required 
+            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+          />
+          <input 
+            type="email" 
+            placeholder="Email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+          />
           <div className="relative">
-            <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 px-3 text-gray-400">{showPassword ? '👁️' : '🙈'}</button>
+            <input 
+              type={showPassword ? 'text' : 'password'} 
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)} 
+              required 
+              className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+            />
+            <button 
+              type="button" 
+              onClick={() => setShowPassword(!showPassword)} 
+              className="absolute inset-y-0 right-0 px-3 text-gray-400"
+            >
+              {showPassword ? '👁️' : '🙈'}
+            </button>
           </div>
           {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
-          <button type="submit" disabled={loading} className={`w-full bg-indigo-600 text-white py-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}>{loading ? 'Registering...' : 'Register'}</button>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className={`w-full bg-indigo-600 text-white py-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {loading ? 'Registering...' : 'Register'}
+          </button>
         </form>
         {message && <p className="text-center text-white mt-2">{message}</p>}
-        <p className="text-center text-white">Already have an account? <a href="/login_route" className="text-indigo-500">Login</a></p>
+        <p className="text-center text-white">
+          Already have an account? <a href="/login_route" className="text-indigo-500">Login</a>
+        </p>
       </div>
     </div>
   );
