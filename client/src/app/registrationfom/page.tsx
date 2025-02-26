@@ -11,7 +11,8 @@ const RegistrationForm = () => {
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState('');
 
-  // Password validation function
+  const API_URL = process.env.CLIENT_ORIGIN || "https://watch-and-earn-production.up.railway.app/";
+
   const validatePassword = (password: string) => {
     const minLength = /.{8,}/;
     const hasNumber = /[0-9]/;
@@ -28,7 +29,7 @@ const RegistrationForm = () => {
     return '';
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
@@ -42,16 +43,14 @@ const RegistrationForm = () => {
     }
 
     try {
-      // Replace the URL with your backend endpoint
       const response = await axios.post(
-        "https://watch-and-earn-production.up.railway.app/register", 
+        `${API_URL}/register`, 
         { name, email, password }, 
         {
           headers: { 'Content-Type': 'application/json' },
           withCredentials: true,
         }
       );
-
       setMessage(response.data.message || 'Registration successful!');
       setName('');
       setEmail('');
@@ -60,12 +59,9 @@ const RegistrationForm = () => {
       setTimeout(() => {
         window.location.href = '/login_route';
       }, 1500);
-    } catch (error: unknown) {
-      // Narrow the error type
+    } catch (error) {
       if (axios.isAxiosError(error)) {
         setMessage(error.response?.data?.message || 'Registration failed. Please try again.');
-      } else if (error instanceof Error) {
-        setMessage(error.message);
       } else {
         setMessage('Registration failed. Please try again.');
       }
@@ -85,7 +81,7 @@ const RegistrationForm = () => {
             value={name} 
             onChange={(e) => setName(e.target.value)} 
             required 
-            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" 
           />
           <input 
             type="email" 
@@ -93,7 +89,7 @@ const RegistrationForm = () => {
             value={email} 
             onChange={(e) => setEmail(e.target.value)} 
             required 
-            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+            className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" 
           />
           <div className="relative">
             <input 
@@ -102,7 +98,7 @@ const RegistrationForm = () => {
               value={password} 
               onChange={(e) => setPassword(e.target.value)} 
               required 
-              className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white" 
+              className="w-full p-2 border border-gray-700 rounded bg-gray-800 text-white focus:outline-none focus:ring-2 focus:ring-indigo-500" 
             />
             <button 
               type="button" 
@@ -116,7 +112,7 @@ const RegistrationForm = () => {
           <button 
             type="submit" 
             disabled={loading} 
-            className={`w-full bg-indigo-600 text-white py-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            className={`w-full bg-indigo-600 text-white py-2 rounded ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-indigo-700'}`}
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
