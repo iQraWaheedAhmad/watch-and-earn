@@ -2,7 +2,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import axios from "axios";
 
 const LoginForm = () => {
   const [formData, setFormData] = useState({
@@ -30,46 +29,33 @@ const LoginForm = () => {
     setMessage("");
 
     try {
-      // Make API request to the backend login endpoint
-      const response = await axios.post("https://watch-and-earn-production.up.railway.app/login", {
-        email: formData.email,
-        password: formData.password,
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
       });
 
-      if (response.status === 200) {
+      const data = await response.json();
+      console.log("Response from API:", data);
+
+      if (response.ok) {
         setMessage("Login successful!");
-        console.log(response.data);
-
-        // Store token if available
-        if (response.data.token) {
-          localStorage.setItem("authToken", response.data.token);
+        
+        if (data.token) {
+          localStorage.setItem("authToken", data.token);
         }
 
-        // Redirect based on email
-        if (formData.email === "admin@gmail.com") {
-          setTimeout(() => {
-            router.push("/dashboard"); // Admin goes to dashboard
-          }, 1000);
-        } else {
-          setTimeout(() => {
-            router.push("/payment_route"); // Regular users go to payment route
-          }, 1000);
-        }
+        setTimeout(() => {
+          router.push(formData.email === "admin@gmail.com" ? "/dashboard" : "/payment_route");
+        }, 1000);
       } else {
-        setMessage("Unexpected error occurred. Please try again.");
+        setMessage(data.message || "Login failed. Please check your email and password.");
       }
-    } catch (error: unknown) {
-      // Narrow the error type before accessing its properties
-      if (axios.isAxiosError(error)) {
-        setMessage(
-          error.response?.data?.message ||
-            "Login failed. Please check your email and password."
-        );
-      } else if (error instanceof Error) {
-        setMessage(error.message);
-      } else {
-        setMessage("Login failed. Please check your email and password.");
-      }
+    } catch (error) {
+      console.error("API Error:", error);
+      setMessage("Login failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -151,6 +137,6 @@ const LoginForm = () => {
       </div>
     </div>
   );
-};
+};  
 
 export default LoginForm;
