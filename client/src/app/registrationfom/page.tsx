@@ -14,8 +14,10 @@ const RegistrationForm = () => {
   const [registered, setRegistered] = useState(false);
   const router = useRouter();
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
   // Password Validation Function
-  const validatePassword = (password: string) => {
+  const validatePassword = (password: string): string => {
     if (password.length < 8) return 'Password must be at least 8 characters.';
     if (!/[0-9]/.test(password)) return 'Password must include at least one number.';
     if (!/[A-Z]/.test(password)) return 'Password must include at least one uppercase letter.';
@@ -31,7 +33,6 @@ const RegistrationForm = () => {
     setMessage('');
     setPasswordError('');
 
-    // Validate Password Before Sending Request
     const passwordValidationError = validatePassword(password);
     if (passwordValidationError) {
       setPasswordError(passwordValidationError);
@@ -40,7 +41,7 @@ const RegistrationForm = () => {
     }
 
     try {
-      const response = await fetch("/api/register", { 
+      const response = await fetch(`${API_URL}/api/register`, { 
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -54,8 +55,7 @@ const RegistrationForm = () => {
       }
 
       setMessage("Registration successful! Click below to go to login.");
-      setRegistered(true); // ✅ Show Login Button
-
+      setRegistered(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Registration failed. Please try again.");
     } finally {
@@ -107,7 +107,6 @@ const RegistrationForm = () => {
           </div>
           {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
 
-          {/* ✅ Fixed Register Button */}
           <button 
             type="submit" 
             disabled={loading} 
@@ -119,7 +118,6 @@ const RegistrationForm = () => {
 
         {message && <p className="text-center text-white mt-2">{message}</p>}
 
-        {/* ✅ Show "Go to Login" Button Only When Registered */}
         {registered && (
           <Link 
             href="/login_route" 
