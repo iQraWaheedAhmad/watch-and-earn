@@ -8,8 +8,7 @@
         "allowSyntheticDefaultImports": true,
      "strict": false,
     "noEmit": true,
-
-    "skipLibCheck": false,
+    "skipLibCheck": true,
 
     "esModuleInterop": true,
     "types": ["react", "react-dom"],
@@ -18,6 +17,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
+   
+   
     "incremental": true,
     "plugins": [
       {

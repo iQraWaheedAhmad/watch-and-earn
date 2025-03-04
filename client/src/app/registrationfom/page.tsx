@@ -14,7 +14,7 @@ const RegistrationForm = () => {
   const [registered, setRegistered] = useState(false);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://watch-and-earn-production.up.railway.app";
 
   // Password Validation Function
   const validatePassword = (password: string): string => {
@@ -120,7 +120,7 @@ const RegistrationForm = () => {
 
         {registered && (
           <Link 
-            href="/login_route" 
+            href="/login" 
             className="block text-center bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition duration-200"
           >
             Go to Login
@@ -129,7 +129,7 @@ const RegistrationForm = () => {
 
         <p className="text-center text-white">
           Already have an account? 
-          <Link href="/login_route" className="text-indigo-500 ml-1">Login</Link>
+          <Link href="/login" className="text-indigo-500 ml-1">Login</Link>
         </p>
       </div>
     </div>
