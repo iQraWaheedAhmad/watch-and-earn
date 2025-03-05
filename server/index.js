@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Define allowed origins using environment variables
 const allowedOrigins = [
-  process.env.LOCALHOST_URL || "http://localhost:3000",
+  process.env.LOCALHOST_URL || "http://localhost:3001",
   process.env.CLIENT_ORIGIN || "https://watchandearn.it.com"
 ];
 
@@ -52,7 +52,7 @@ if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
 }
 
 // Register endpoint to save new employee data
-app.post("/api/register", async (req, res) => {
+app.post("/register", async (req, res) => {
   try {
     console.log("🔍 Incoming Registration Data:", req.body);
     const { name, email, password } = req.body;
@@ -77,7 +77,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 // Login endpoint
-app.post("/api/login", async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     console.log("🔍 Incoming Login Data:", req.body);
     const { email, password } = req.body;
