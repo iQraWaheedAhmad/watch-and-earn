@@ -11,10 +11,13 @@ const app = express();
 // Middleware to parse JSON requests
 app.use(express.json());
 
-// Define allowed origins for CORS
-const allowedOrigins = ["http://localhost:3000", "https://watchandearn.it.com"];
+// Define allowed origins using environment variables
+const allowedOrigins = [
+  process.env.LOCALHOST_URL || "http://localhost:3000",
+  process.env.CLIENT_ORIGIN || "https://watchandearn.it.com"
+];
 
-// Configure CORS to allow only the specified origins and support credentials
+// Configure CORS with allowed origins and credentials support
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST"],
@@ -27,10 +30,11 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection (using your 'employee' database)
-// Note: Removed extra whitespace in the fallback connection string
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://root:Itj8GT0INm80AaiQ@cluster0.oh2nc.mongodb.net/employee";
 
 mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
 })
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
