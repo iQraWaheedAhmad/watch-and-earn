@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection
-const MONGO_URI = process.env.MONGO_URI ||" mongodb+srv://root:ypkSfp3jgST0P8jy@cluster0.oh2nc.mongodb.net//employee";  // Local MongoDB URI
+const MONGO_URI = process.env.MONGO_URI ||" mongodb+srv://root:ypkSfp3jgST0P8jy@cluster0.oh2nc.mongodb.net/employee";  // Local MongoDB URI
 mongoose.connect(MONGO_URI, {})
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
