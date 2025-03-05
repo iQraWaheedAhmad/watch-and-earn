@@ -8,12 +8,13 @@ const EmployeeModel = require("./models/Employee");
 
 const app = express();
 
-// Middleware
+// Middleware to parse JSON requests
 app.use(express.json());
 
-// Update allowed origins for CORS
+// Define allowed origins for CORS
 const allowedOrigins = ["http://localhost:3000", "https://watchandearn.it.com"];
 
+// Configure CORS to allow only the specified origins and support credentials
 app.use(cors({
   origin: allowedOrigins,
   methods: ["GET", "POST"],
@@ -26,11 +27,10 @@ app.get("/", (req, res) => {
 });
 
 // MongoDB connection (using your 'employee' database)
+// Note: Removed extra whitespace in the fallback connection string
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://root:Itj8GT0INm80AaiQ@cluster0.oh2nc.mongodb.net/employee";
 
 mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
 })
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
@@ -38,7 +38,7 @@ mongoose.connect(MONGO_URI, {
     process.exit(1);
   });
 
-// Load Admin credentials from .env
+// Load Admin credentials from .env (with defaults)
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
@@ -81,7 +81,7 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check for Admin Login
+    // Check if admin login
     if (email === ADMIN_EMAIL) {
       if (password === ADMIN_PASSWORD) {
         return res.status(200).json({
