@@ -11,8 +11,8 @@ const app = express();
 // Middleware
 app.use(express.json());
 
-// Read CLIENT_ORIGIN from .env
-const allowedOrigins = [process.env.CLIENT_ORIGIN || "http://localhost:3000"];
+// Update allowed origins for CORS
+const allowedOrigins = ["http://localhost:3000", "https://watchandearn.it.com"];
 
 app.use(cors({
   origin: allowedOrigins,
@@ -25,9 +25,13 @@ app.get("/", (req, res) => {
   res.send("Server is running and connected to MongoDB!");
 });
 
-// MongoDB connection
-const MONGO_URI = process.env.MONGO_URI ||" mongodb+srv://root:ypkSfp3jgST0P8jy@cluster0.oh2nc.mongodb.net/employee";  // Local MongoDB URI
-mongoose.connect(MONGO_URI, {})
+// MongoDB connection (using your 'employee' database)
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://root:Itj8GT0INm80AaiQ@cluster0.oh2nc.mongodb.net/employee";
+
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
@@ -39,11 +43,11 @@ const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
 if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-  console.error("⚠️ ERROR: Admin credentials (ADMIN_EMAIL & ADMIN_PASSWORD) are missing in .env!");
+  console.error("⚠️ ERROR: Admin credentials (ADMIN_EMAIL & ADMIN_PASSWORD) are not set in .env file!");
   process.exit(1);
 }
 
-// Register endpoint
+// Register endpoint to save new employee data
 app.post("/api/register", async (req, res) => {
   try {
     console.log("🔍 Incoming Registration Data:", req.body);
@@ -77,7 +81,7 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check if admin
+    // Check for Admin Login
     if (email === ADMIN_EMAIL) {
       if (password === ADMIN_PASSWORD) {
         return res.status(200).json({
@@ -89,13 +93,12 @@ app.post("/api/login", async (req, res) => {
       }
     }
 
-    // Check if user exists
+    // Normal user login
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "❌ No user found with that email" });
     }
 
-    // Verify password
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ message: "❌ Incorrect password" });
