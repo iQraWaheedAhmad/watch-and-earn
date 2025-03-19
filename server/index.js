@@ -9,14 +9,15 @@ const EmployeeModel = require("./models/Employee");
 const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Not Found");  // Debugging
+console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Not Found");
 
 // Middleware
 app.use(cors({
-  origin: [process.env.CLIENT_ORIGIN || "http://localhost:3000"],
+  origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
   methods: ["GET", "POST"],
   credentials: true,
 }));
+app.use(express.json()); // Ensure JSON parsing is enabled
 
 // Root Route
 app.get("/", (req, res) => {
@@ -65,8 +66,8 @@ app.post("/stripe-checkout", async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.CLIENT_ORIGIN}/cancel`,
+      success_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_ORIGIN || "http://localhost:3000"}/cancel`,
     });
 
     console.log("✅ Stripe Session Created:", session);
@@ -82,7 +83,6 @@ app.post("/stripe-checkout", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 // ✅ Register Route
 app.post("/register", async (req, res) => {
