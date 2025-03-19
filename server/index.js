@@ -57,8 +57,8 @@ app.post("/stripe-checkout", async (req, res) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Plan: ₨${plan.price.toLocaleString()}`,
-              description: `Daily Profit: ₨${plan.profit}`,
+              name: `Plan: $${plan.price.toLocaleString()}`,
+              description: `Daily Profit: $${plan.profit}`,
             },
             unit_amount: amount * 100,
           },
@@ -71,12 +71,6 @@ app.post("/stripe-checkout", async (req, res) => {
     });
 
     console.log("✅ Stripe Session Created:", session);
-
-    if (!session.url) {
-      console.error("❌ Stripe session URL missing!", session);
-      return res.status(500).json({ error: "Stripe session URL is missing" });
-    }
-
     res.status(200).json({ id: session.id, url: session.url });
   } catch (err) {
     console.error("❌ Stripe Payment Error:", err);
@@ -118,15 +112,11 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    if (email === ADMIN_EMAIL) {
-      if (password === ADMIN_PASSWORD) {
-        return res.status(200).json({
-          message: "✅ Admin login successful",
-          user: { email: ADMIN_EMAIL, role: "admin" },
-        });
-      } else {
-        return res.status(401).json({ message: "❌ Incorrect admin password" });
-      }
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+      return res.status(200).json({
+        message: "✅ Admin login successful",
+        user: { email: ADMIN_EMAIL, role: "admin" },
+      });
     }
 
     const user = await EmployeeModel.findOne({ email });
