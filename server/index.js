@@ -1,57 +1,90 @@
-require("dotenv").config(); // Load environment variables
-
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
+const Stripe = require("stripe");
 const EmployeeModel = require("./models/Employee");
 
 const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Middleware to parse JSON requests
-app.use(express.json());
+console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY ? "✅ Loaded" : "❌ Not Found");  // Debugging
 
-// Define allowed origins using environment variables
-const allowedOrigins = [
-  process.env.LOCALHOST_URL || "http://localhost:3001",
-  process.env.CLIENT_ORIGIN || "https://watchandearn.it.com"
-];
-
-// Configure CORS with allowed origins and credentials support
+// Middleware
 app.use(cors({
-  origin: allowedOrigins,
+  origin: [process.env.CLIENT_ORIGIN || "http://localhost:3000"],
   methods: ["GET", "POST"],
-  credentials: true
+  credentials: true,
 }));
 
-// Root route to check server status
+// Root Route
 app.get("/", (req, res) => {
-  res.send("Server is running and connected to MongoDB!");
+  res.send("🚀 Server is running and connected to MongoDB!");
 });
 
-// MongoDB connection (using your 'employee' database)
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://root:Itj8GT0INm80AaiQ@cluster0.oh2nc.mongodb.net/employee";
-
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+// MongoDB Connection
+mongoose
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => console.log("✅ MongoDB connected successfully"))
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err);
     process.exit(1);
   });
 
-// Load Admin credentials from .env (with defaults)
+// Admin Credentials
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "admin@gmail.com";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
-if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
-  console.error("⚠️ ERROR: Admin credentials (ADMIN_EMAIL & ADMIN_PASSWORD) are not set in .env file!");
-  process.exit(1);
-}
+// ✅ Stripe Checkout Route
+app.post("/stripe-checkout", async (req, res) => {
+  try {
+    console.log("Incoming request body:", req.body);
 
-// Register endpoint to save new employee data
+    const { amount, plan } = req.body;
+    if (!amount || !plan) {
+      return res.status(400).json({ error: "Amount and plan details are required" });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: `Plan: ₨${plan.price.toLocaleString()}`,
+              description: `Daily Profit: ₨${plan.profit}`,
+            },
+            unit_amount: amount * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${process.env.CLIENT_ORIGIN}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.CLIENT_ORIGIN}/cancel`,
+    });
+
+    console.log("✅ Stripe Session Created:", session);
+
+    if (!session.url) {
+      console.error("❌ Stripe session URL missing!", session);
+      return res.status(500).json({ error: "Stripe session URL is missing" });
+    }
+
+    res.status(200).json({ id: session.id, url: session.url });
+  } catch (err) {
+    console.error("❌ Stripe Payment Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+// ✅ Register Route
 app.post("/register", async (req, res) => {
   try {
     console.log("🔍 Incoming Registration Data:", req.body);
@@ -76,7 +109,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Login endpoint
+// ✅ Login Route
 app.post("/login", async (req, res) => {
   try {
     console.log("🔍 Incoming Login Data:", req.body);
@@ -85,7 +118,6 @@ app.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email and password are required" });
     }
 
-    // Check if admin login
     if (email === ADMIN_EMAIL) {
       if (password === ADMIN_PASSWORD) {
         return res.status(200).json({
@@ -97,7 +129,6 @@ app.post("/login", async (req, res) => {
       }
     }
 
-    // Normal user login
     const user = await EmployeeModel.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: "❌ No user found with that email" });
@@ -115,7 +146,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Start the server on port 3001
+// ✅ Start the Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
